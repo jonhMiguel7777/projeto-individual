@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Otherside Culture</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="cabecalho">
+        <a class="logo" href="index.html">
+            <img src="assets/images/logo.png" alt="Logo Otherside Culture">
+        </a>
+        <nav class="cabecalho-nav">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </div>
+    
+    <div class="secao-form">
+        <div class="container-form">
+            <h2>Criar conta</h2>
+                <div class="campo-formulario">
+                    <label for="nome">Nome completo:</label>
+                    <input type="text" id="ipt_nome" name="nome" required>
+                </div>
+                <div class="campo-formulario">
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="ipt_email" name="email" required>
+                </div>
+                <div class="campo-formulario">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="ipt_senha" name="senha" required>
+                </div>
+                <div class="campo-formulario">
+                    <label for="confirmar-senha">Confirmar senha:</label>
+                    <input type="password" id="ipt_confirmar_senha" name="confirmar-senha" required>
+                </div>
+                <button type="submit" class="botao-form" onclick="cadastrar()">Cadastrar</button>
+            <p class="link-form">Já tem uma conta? <a href="login.html">Faça login aqui</a></p>
+        </div>
+    </div>
+
+    <script>
+
+  // Array para armazenar empresas cadastradas para validação de código de ativação 
+  let listaEmpresasCadastradas = [];
+
+  function cadastrar() {
+    // aguardar();
+
+    //Recupere o valor da nova input pelo nome do id
+    // Agora vá para o método fetch logo abaixo
+    var nomeVar  =  ipt_nome.value;
+    var emailVar =  ipt_email.value;
+    var senhaVar =  ipt_senha.value;
+    var confirmacaoSenhaVar = ipt_confirmar_senha.value;
+
+    // Verificando se há algum campo em branco
+    if (
+      nomeVar == "" ||
+      emailVar == "" ||
+      senhaVar == "" ||
+      confirmacaoSenhaVar == ""
+) {
+
+      alert("Preencha todos os campos")
+      return false;
+    } else {
+      setInterval(5000);
+    }
+
+    fetch("/usuarios/cadastrar", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        // crie um atributo que recebe o valor recuperado aqui
+        // Agora vá para o arquivo routes/usuario.js
+        nomeServer: nomeVar,
+        emailServer: emailVar,
+        senhaServer: senhaVar,
+      }),
+    })
+      .then(function (resposta) {
+        console.log("resposta: ", resposta);
+
+        if (resposta.ok) {
+        //   cardErro.style.display = "block";
+
+        //   mensagem_erro.innerHTML =
+        //     "Cadastro realizado com sucesso! Redirecionando para tela de Login...";
+            alert("Cadastro realizado com sucesso! Redirecionando para tela de Login...")
+
+          setTimeout(() => {
+            window.location = "login.html";
+          }, "2000");
+        } else {
+          throw "Houve um erro ao tentar realizar o cadastro!";
+        }
+      })
+      .catch(function (resposta) {
+        console.log(`#ERRO: ${resposta}`);
+      });
+
+    return false;
+  }
+</script>
+</body>
+</html>

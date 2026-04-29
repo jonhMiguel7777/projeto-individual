@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métricas - Otherside Culture</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="cabecalho">
+        <a class="logo" href="index.html">
+            <img src="assets/images/logo.png" alt="Logo Otherside Culture">
+        </a>
+        <nav class="cabecalho-nav">
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="posts.html">Posts</a></li>
+                <li><a href="addPost.html">Adicionar Post</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="secao-metricas">
+        <div class="container-metricas">
+            <h1>Métricas dos eventos</h1>
+            <p class="descricao-metricas">Acompanhe o desempenho e crescimento da sua Casa de cultura.</p>
+
+            <div class="grafico-container">
+                <h2 id="comparecimentos">Quantas pessoas compareceram aos evento</h2>
+                <canvas id="grafico_linha" width="400" height="200"></canvas>
+            </div>
+
+            <div class="metricas-grid">
+                <div class="metrica-card">
+                    <h3>Pessoas que frequentaram no total</h3>
+                    <div class="numero-metrica">1000</div>
+                    <p class="tendencia">+12% este mês</p>
+                </div>
+                <div class="metrica-card">
+                    <h3>Eventos Realizados</h3>
+                    <div class="numero-metrica">6</div>
+                    <p class="tendencia">+8% este mês</p>
+                </div>
+                <div class="metrica-card">
+                    <h3>Média de pessoas</h3>
+                    <div class="numero-metrica">250</div>
+                    <p class="tendencia">+15% este mês</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    let lineChart = document.getElementById('grafico_linha');
+    let chart = new Chart(lineChart, {
+        type: 'line',
+        data: {
+            labels: ['reggae do maneiro', 'pagofunk', 'samba do negueba', 'faeti', 'mc kelvinho', 'pagodao da nega'],
+            datasets: [{
+                label: "Eventos",
+                data: [150, 200, 300, 100, 500, 400],
+                borderColor: '#e3242b',
+                backgroundColor: 'rgba(227, 36, 43, 0.1)',
+                borderWidth: 3,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Pessoas que frequentaram',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    }
+                },
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+    </script>
+</body>
+</html>

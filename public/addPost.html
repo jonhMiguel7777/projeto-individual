@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Postar - OutherSide Culture</title>
+    <link rel="stylesheet" href="assets/style.css" />
+  </head>
+  <body>
+    <div class="cabecalho">
+      <a class="logo" href="index.html">
+        <img src="assets/images/logo.png" alt="Logo Otherside Culture" />
+      </a>
+      <nav class="cabecalho-nav">
+        <ul>
+          <li><a href="posts.html">Posts</a></li>
+          <li><a href="login.html">Métricas</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div class="secao-form">
+      <div class="container-form">
+        <h2>Crie sua Postagem</h2>
+        <form onsubmit="publicarPost(event)">
+          <div class="campo-formulario">
+            <label for="titulo">Qual o titulo do seu post?</label>
+            <input type="text" id="titulo" name="titulo" required />
+          </div>
+          <div class="campo-formulario">
+            <label for="conteudo">Qual o conteúdo do seu post?</label>
+            <input type="text" id="conteudo" name="conteudo" required />
+          </div>
+          <div class="campo-formulario">
+            <label for="imagem">Imagem do seu post</label>
+            <input type="file" id="imagem" name="imagem"/>
+          </div>
+          <button type="submit" class="botao-form">Postar</button>
+        </form>
+    </div>
+    <script>
+      function publicarPost(event) {
+        event.preventDefault();
+
+        var titulo = document.getElementById('titulo').value;
+        var conteudo = document.getElementById('conteudo').value;
+        var fkUsuario = sessionStorage.getItem("ID_USUARIO");
+
+        fetch('/posts/cadastrar', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            tituloServer: titulo,
+            conteudoServer: conteudo,
+            fkUsuarioServer: fkUsuario
+          })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          console.log(data);
+          alert('Post publicado com sucesso!');
+          window.location.href = 'posts.html';
+        })
+        .catch(function(err) {
+          console.error(err);
+          alert('Erro ao publicar post!');
+        });
+      }
+    </script>
+  </body>
+</html>

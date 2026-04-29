@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts - Outherside Culture</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+     <div class="cabecalho">
+      <a class="logo" href="index.html">
+        <img src="assets/images/logo.png" alt="Logo Otherside Culture" />
+      </a>
+      <nav class="cabecalho-nav">
+        <ul>
+          <li><a href="index.html">home</a></li>
+          <li><a href="login.html">Métricas</a></li>
+          <li><a href="addPost.html">Adicionar posts</a></li>
+          <li><a href="addEvento.html">Adicionar evento</a></li>
+        </ul>
+      </nav>
+    </div>
+
+
+    <div id="feed-posts">
+      
+    </div>
+
+    <script>
+      fetch('/posts/listar')
+  .then(res => res.json())
+  .then(posts => {
+    var feed = document.getElementById('feed-posts');
+    for (let i = 0; i < posts.length; i++) {
+      var post = posts[i];
+      var html = '<div class="post">';
+      html += '<h3>' + post.titulo + '</h3>';
+      html += '<p>' + post.conteudo + '</p>';
+      if (post.caminho) {
+        html += '<img src="' + post.caminho + '" style="max-width:100%">';
+      }
+      html += '<small>Por: ' + post.autor + ' - ' + post.dataPost + '</small>';
+      if (post.comentarios) {
+        html += '<div class="comentarios"><strong>Comentários:</strong> ' + post.comentarios + '</div>';
+      }
+      html += '</div>';
+      feed.innerHTML += html;
+    }
+  });
+    </script>
+</body>
+</html>
