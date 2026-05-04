@@ -22,6 +22,8 @@ var postsRouter = require("./src/routes/posts");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+app.use('/assets/uploads', express.static('public/assets/uploads'));
+app.use(express.static('public'));
 
 app.use(cors());
 

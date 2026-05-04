@@ -1,11 +1,3 @@
--- Arquivo de apoio, caso você queira criar tabelas como as aqui criadas para a API funcionar.
--- Você precisa executar os comandos no banco de dados para criar as tabelas,
--- ter este arquivo aqui não significa que a tabela em seu BD estará como abaixo!
-
-/*
-comandos para mysql server
-*/
-
 create database cultures;
 use cultures;
 
@@ -25,19 +17,14 @@ create table perfil (
 
 create table post (
 	id int primary key auto_increment,
-    titulo varchar(100),
     conteudo varchar(200), 
     dataPost datetime default current_timestamp,
     fk_usuario int,
     constraint fkUsuario_post foreign key (fk_usuario) references usuario(id)
 );
 
-create table foto_post (
-	id int primary key auto_increment,
-    caminho varchar (255), 
-    fk_post int, 
-   constraint fkPosts foreign key (fk_post) references post(id)
-);
+alter table post add column titulo varchar(200);
+alter table post add column imagem varchar(255);
 
 create table comentarios(
 	id int primary key auto_increment, 
@@ -74,9 +61,6 @@ INSERT INTO usuario (nome, email, senha) VALUES
 ('Carlos', 'carlos@email.com', '123'),
 ('Ana', 'ana@email.com', '123');
 
-truncate table  perfil;
-truncate table usuario;
-
 INSERT INTO perfil (bio, fk_usuario) VALUES
 ('Fav culture', 1),
 ('Reação arte e cultura', 2),
@@ -89,12 +73,6 @@ INSERT INTO post (conteudo, fk_usuario) VALUES
 ('Aprendendo Node.js.', 1),
 ('Projeto novo em andamento.', 3);
 
-INSERT INTO foto_post (caminho, fk_post) VALUES
-('foto1.jpg', 1),
-('foto2.jpg', 1),
-('foto3.jpg', 2),
-('foto4.jpg', 3),
-('foto5.jpg', 4);
 
 INSERT INTO comentarios
 (texto, fk_usuario, fk_post)
@@ -140,12 +118,7 @@ FROM usuario
 JOIN post
 ON usuario.id = post.fk_usuario;
 
-SELECT 
-    post.conteudo,
-    foto_post.caminho
-FROM post
-JOIN foto_post
-ON post.id = foto_post.fk_post;
+
 
 SELECT 
     usuario.nome,
@@ -167,17 +140,25 @@ ON post.id = comentarios.fk_post;
 -- feed completo
 
 SELECT 
-    usuario.nome,
+    usuario.nome AS autor,
+    post.titulo,
     post.conteudo,
-    foto_post.caminho,
-    comentarios.texto
+    post.dataPost,
+    post.imagem, -- agora pega direto da tabela post
+    COUNT(comentarios.id) AS comentarios
 FROM post
 JOIN usuario
-ON usuario.id = post.fk_usuario
-LEFT JOIN foto_post
-ON post.id = foto_post.fk_post
+    ON usuario.id = post.fk_usuario
 LEFT JOIN comentarios
-ON comentarios.fk_post = post.id;
+    ON comentarios.fk_post = post.id
+GROUP BY 
+    post.id,
+    usuario.nome,
+    post.titulo,
+    post.conteudo,
+    post.dataPost,
+    post.imagem
+ORDER BY post.dataPost DESC;
 
 -- insert para a dash 
 
@@ -217,3 +198,32 @@ select *
 from evento e
 inner join usuario u
 on e.fkUsuario = u.id;
+
+select * from usuario;
+select * from post;
+
+SELECT 
+    post.id,
+    post.titulo,
+    post.fk_usuario,
+    usuario.nome
+FROM post
+JOIN usuario
+ON usuario.id = post.fk_usuario;
+
+
+
+INSERT INTO post (titulo, conteudo, fk_usuario) VALUES
+('Post da Maria', 'Teste Maria', 2),
+('Post do João', 'Teste João', 1),
+('Post do Carlos', 'Teste Carlos', 3);
+
+
+SELECT 
+    post.id,
+    post.titulo,
+    post.fk_usuario,
+    usuario.nome
+FROM post
+JOIN usuario
+ON usuario.id = post.fk_usuario;

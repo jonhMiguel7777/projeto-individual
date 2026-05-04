@@ -1,11 +1,9 @@
-var express = require("express");
-var router = express.Router();
+let express = require("express");
+let router = express.Router();
+let upload = require('../config/multer')
+let postController = require("../controllers/postController");
 
-var postController = require("../controllers/postController");
-
-router.post("/cadastrar", function (req, res) {
-    postController.cadastrar(req, res);
-})
+router.post("/cadastrar", upload.single("imagem"), postController.cadastrar);
 
 router.get("/listar", function (req, res) {
     postController.listar(req, res);

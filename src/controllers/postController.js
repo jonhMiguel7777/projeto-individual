@@ -1,9 +1,10 @@
-var postModel = require("../models/postModel");
+let postModel = require("../models/postModel");
 
 function cadastrar(req, res) {
-    var titulo = req.body.tituloServer;
-    var conteudo = req.body.conteudoServer;
-    var fkUsuario = req.body.fkUsuarioServer;
+    let titulo = req.body.tituloServer;
+    let conteudo = req.body.conteudoServer;
+    let fkUsuario = req.body.fkUsuarioServer;
+    let imagem = req.file ? req.file.filename : null
 
     if (titulo == undefined) {
         res.status(400).send("O título está undefined!");
@@ -12,7 +13,7 @@ function cadastrar(req, res) {
     } else if (fkUsuario == undefined) {
         res.status(400).send("O usuário está undefined!");
     } else {
-        postModel.cadastrar(titulo, conteudo, fkUsuario)
+        postModel.cadastrar(titulo, conteudo, fkUsuario, imagem)
             .then(
                 function (resultado) {
                     res.json(resultado);
