@@ -13,10 +13,11 @@
       </a>
       <nav class="cabecalho-nav">
         <ul>
-          <li><a href="index.html">home</a></li>
           <li><a href="login.html">Métricas</a></li>
           <li><a href="addPost.html">Adicionar posts</a></li>
           <li><a href="addEvento.html">Adicionar evento</a></li>
+          <li><a id="nomeUsers"></a></li>
+
         </ul>
       </nav>
     </div>
@@ -27,6 +28,8 @@
     </div>
 
     <script>
+      nomeUsers.innerHTML = sessionStorage.NOME_USUARIO;
+
       fetch('/posts/listar')
   .then(res => res.json())
   .then(posts => {

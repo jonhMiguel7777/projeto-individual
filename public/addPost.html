@@ -15,6 +15,7 @@
         <ul>
           <li><a href="posts.html">Posts</a></li>
           <li><a href="login.html">Métricas</a></li>
+          <li><a id="nomeUsers"></a></li>
         </ul>
       </nav>
     </div>
@@ -38,9 +39,10 @@
         </form>
     </div>
     <script>
+      nomeUsers.innerHTML = sessionStorage.NOME_USUARIO;
+      
+      
       function publicarPost(event) {
-  event.preventDefault();
-
   let titulo = document.getElementById('titulo').value;
   let conteudo = document.getElementById('conteudo').value;
   let imagem = document.getElementById('imagem').files[0];
