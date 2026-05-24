@@ -1,53 +1,67 @@
 let postModel = require("../models/postModel");
 
-function cadastrar(req, res) {
-    let titulo = req.body.tituloServer;
-    let conteudo = req.body.conteudoServer;
-    let fkUsuario = req.body.fkUsuarioServer;
-    let imagem = req.file ? req.file.filename : null
+function listar(req, res) {
 
-    if (titulo == undefined) {
-        res.status(400).send("O título está undefined!");
-    } else if (conteudo == undefined) {
-        res.status(400).send("O conteúdo está undefined!");
-    } else if (fkUsuario == undefined) {
-        res.status(400).send("O usuário está undefined!");
-    } else {
-        postModel.cadastrar(titulo, conteudo, fkUsuario, imagem)
-            .then(
-                function (resultado) {
-                    res.json(resultado);
-                }
-            ).catch(
-                function (erro) {
-                    console.log(erro);
-                    console.log("\nHouve um erro ao cadastrar o post! Erro: ", erro.sqlMessage);
-                    res.status(500).json(erro.sqlMessage);
-                }
-            );
-    }
+    postModel.listar()
+        .then(function(resultado) {
+            res.json(resultado);
+        })
+        .catch(function(erro) {
+            console.log(erro);
+            res.status(500).json(erro.sqlMessage);
+        });
 }
 
-function listar(req, res) {
-    postModel.listar()
-        .then(
-            function (resultado) {
-                if (resultado.length > 0) {
-                    res.json(resultado);
-                } else {
-                    res.status(204).send("Nenhum post encontrado!");
-                }
+function cadastrar(req, res) {
+
+    let titulo = req.body.tituloServer;
+    let conteudo = req.body.conteudoServer;
+    let imagem = null;
+    let fk_usuario = req.body.fkUsuarioServer;
+
+    if (req.file) {
+    imagem = req.file.filename;
+    }
+    
+    postModel.cadastrar(
+        titulo,
+        conteudo,
+        imagem,
+        fk_usuario
+    )
+    .then(function(resultado) {
+        res.json(resultado);
+    })
+    .catch(function(erro) {
+        console.log(erro);
+        res.status(500).json(erro.sqlMessage);
+    });
+}
+
+function deletar(req, res) {
+    let idPost    = req.params.idPost;
+    // idUsuario vem como query param: /posts/deletar/5?idUsuario=2
+    let idUsuario = req.query.idUsuario;
+
+    if (!idPost || !idUsuario) {
+        return res.status(400).send("ID do post e do usuário são obrigatórios.");
+    }
+
+    postModel.deletar(idPost, idUsuario)
+        .then(function(resultado) {
+            if (resultado.affectedRows === 0) {
+                return res.status(403).send("Você não tem permissão para deletar este post.");
             }
-        ).catch(
-            function (erro) {
-                console.log(erro);
-                console.log("\nHouve um erro ao listar os posts! Erro: ", erro.sqlMessage);
-                res.status(500).json(erro.sqlMessage);
-            }
-        );
+            res.json({ mensagem: "Post deletado com sucesso!" });
+        })
+        .catch(function(erro) {
+            console.log(erro);
+            res.status(500).json(erro.sqlMessage);
+        });
 }
 
 module.exports = {
+    listar,
     cadastrar,
-    listar
+    deletar
 };

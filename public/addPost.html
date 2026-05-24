@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Postar - OutherSide Culture</title>
     <link rel="stylesheet" href="assets/style.css" />
+    <script src="assets/sessao.js"></script>
   </head>
   <body>
     <div class="cabecalho">
@@ -22,53 +23,104 @@
     <div class="secao-form">
       <div class="container-form">
         <h2>Crie sua Postagem</h2>
-        <form action="/posts/imagemPost" method="post" enctype="multipart/form-data" onsubmit="publicarPost(event)">
+        <form onsubmit="publicarPost(event)" method="post" enctype="multipart/form-data" onsubmit="publicarPost(event)">
           <div class="campo-formulario">
             <label for="titulo">Qual o titulo do seu post?</label>
-            <input type="text" id="titulo" name="titulo" required />
+            <input type="text" id="ipt_titulo" name="titulo" required />
           </div>
           <div class="campo-formulario">
             <label for="conteudo">Qual o conteúdo do seu post?</label>
-            <input type="text" id="conteudo" name="conteudo" required />
+            <input type="text" id="ipt_conteudo" name="conteudo" required />
           </div>
           <div class="campo-formulario">
             <label for="imagem">Imagem do seu post</label>
-            <input type="file" id="imagem" name="imagem" accept="image/*"/>
+            <input type="file" id="ipt_imagem" name="imagem" accept="image/*"/>
           </div>
           <button type="submit" class="botao-form">Postar</button>
         </form>
     </div>
     <script>
-      nomeUsers.innerHTML = sessionStorage.NOME_USUARIO;
-      
-      
-      function publicarPost(event) {
-  let titulo = document.getElementById('titulo').value;
-  let conteudo = document.getElementById('conteudo').value;
-  let imagem = document.getElementById('imagem').files[0];
-  let fkUsuario = sessionStorage.getItem("ID_USUARIO");
 
-  let formData = new FormData();
-  formData.append("tituloServer", titulo);
-  formData.append("conteudoServer", conteudo);
-  formData.append("fkUsuarioServer", fkUsuario);
-  formData.append("imagem", imagem);
+  let sessao = validarSessao();
+  nomeUsers.innerHTML =
+    localStorage.NOME_USUARIO;
 
-  fetch('/posts/cadastrar', {
-    method: 'POST',
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    console.log(data);
-    alert('Post publicado com sucesso!');
-    window.location.href = 'posts.html';
-  })
-  .catch(err => {
-    console.error(err);
-    alert('Erro ao publicar post!');
-  });
-}
+  function publicarPost(event) {
+
+    event.preventDefault();
+
+    let titulo =
+      ipt_titulo.value;
+
+    let conteudo =
+      ipt_conteudo.value;
+
+    let imagem =
+      ipt_imagem.files[0];
+
+    let fkUsuario =
+      localStorage.ID_USUARIO;
+
+    let formData =
+      new FormData();
+
+    formData.append(
+      "tituloServer",
+      titulo
+    );
+
+    formData.append(
+      "conteudoServer",
+      conteudo
+    );
+
+    formData.append(
+      "fkUsuarioServer",
+      fkUsuario
+    );
+
+    formData.append(
+      "imagem",
+      imagem
+    );
+
+    fetch("/posts/cadastrar", {
+
+      method: "POST",
+
+      body: formData
+    })
+
+    .then(function(resposta) {
+
+      if (resposta.ok) {
+
+        alert(
+          "Post publicado com sucesso!"
+        );
+
+        window.location =
+          "posts.html";
+      }
+
+      else {
+
+        alert(
+          "Erro ao publicar post!"
+        );
+      }
+    })
+
+    .catch(function(erro) {
+
+      console.log(erro);
+
+      alert(
+        "Erro no sistema!"
+      );
+    });
+  }
+
 </script>
   </body>
 </html>

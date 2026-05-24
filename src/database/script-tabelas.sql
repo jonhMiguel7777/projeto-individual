@@ -55,6 +55,18 @@ primary key (idEvento, fkUsuario),
 constraint fk_usuario_evento foreign key (fkUsuario) references usuario(id)
 );
 
+create table curtidas (
+	idCurtida int primary key auto_increment, 
+    fk_usuario int, 
+    fk_post int, 
+    data_curtida datetime default current_timestamp, 
+    constraint usuario_curtida foreign key (fk_usuario) references usuario(id), 
+    constraint post_curtida foreign key (fk_post) references post(id),
+    constraint uniqueCurtida unique(fk_usuario, fk_post)
+);
+
+show tables; 
+
 INSERT INTO usuario (nome, email, senha) VALUES
 ('João', 'joao@email.com', '123'),
 ('Maria', 'maria@email.com', '123'),
@@ -73,6 +85,12 @@ INSERT INTO post (conteudo, fk_usuario) VALUES
 ('Aprendendo Node.js.', 1),
 ('Projeto novo em andamento.', 3);
 
+INSERT INTO foto_post (caminho, fk_post) VALUES
+('foto1.jpg', 1),
+('foto2.jpg', 1),
+('foto3.jpg', 2),
+('foto4.jpg', 3),
+('foto5.jpg', 4);
 
 INSERT INTO comentarios
 (texto, fk_usuario, fk_post)
@@ -118,7 +136,12 @@ FROM usuario
 JOIN post
 ON usuario.id = post.fk_usuario;
 
-
+SELECT 
+    post.conteudo,
+    foto_post.caminho
+FROM post
+JOIN foto_post
+ON post.id = foto_post.fk_post;
 
 SELECT 
     usuario.nome,
@@ -140,25 +163,18 @@ ON post.id = comentarios.fk_post;
 -- feed completo
 
 SELECT 
-    usuario.nome AS autor,
-    post.titulo,
-    post.conteudo,
-    post.dataPost,
-    post.imagem, -- agora pega direto da tabela post
-    COUNT(comentarios.id) AS comentarios
-FROM post
-JOIN usuario
-    ON usuario.id = post.fk_usuario
-LEFT JOIN comentarios
-    ON comentarios.fk_post = post.id
-GROUP BY 
-    post.id,
     usuario.nome,
     post.titulo,
     post.conteudo,
-    post.dataPost,
-    post.imagem
-ORDER BY post.dataPost DESC;
+    foto_post.caminho,
+    comentarios.texto
+FROM post
+JOIN usuario
+ON usuario.id = post.fk_usuario
+LEFT JOIN foto_post
+ON post.id = foto_post.fk_post
+LEFT JOIN comentarios
+ON comentarios.fk_post = post.id;
 
 -- insert para a dash 
 
@@ -211,7 +227,13 @@ FROM post
 JOIN usuario
 ON usuario.id = post.fk_usuario;
 
+SET FOREIGN_KEY_CHECKS = 0;
 
+TRUNCATE TABLE comentarios;
+TRUNCATE TABLE foto_post;
+TRUNCATE TABLE post;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 INSERT INTO post (titulo, conteudo, fk_usuario) VALUES
 ('Post da Maria', 'Teste Maria', 2),
@@ -227,3 +249,21 @@ SELECT
 FROM post
 JOIN usuario
 ON usuario.id = post.fk_usuario;
+
+
+-- kpis da dash
+
+-- total de usuários
+SELECT COUNT(*) AS total_usuarios FROM usuario;
+
+-- total de eventos
+SELECT COUNT(*) AS total_eventos FROM evento;
+
+-- média de pessoas por evento
+SELECT AVG(qtdPessoas) AS media_publico FROM evento;
+
+-- posts totais
+SELECT COUNT(*) AS total_posts FROM post;
+
+
+describe post;

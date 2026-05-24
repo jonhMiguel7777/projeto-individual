@@ -18,12 +18,16 @@ let indexRouter = require("./src/routes/index");
 let usuarioRouter = require("./src/routes/usuarios");
 let postsRouter = require("./src/routes/posts");
 let metricasRouter = require("./src/routes/metricas");
+let curtidasRouter = require("./src/routes/curtidas");
+let comentariosRouter = require("./src/routes/comentarios");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/assets/uploads', express.static('public/assets/uploads'));
 app.use(express.static('public'));
+app.use("/curtidas", curtidasRouter);
+app.use("/comentarios", comentariosRouter);
 
 app.use(cors());
 

@@ -1,47 +1,72 @@
-let database = require("../database/config")
+let database = require("../database/config");
 
-function cadastrar(titulo, conteudo, fkUsuario, imagem) {
-    console.log("ACESSEI O POST MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function cadastrar():", titulo, conteudo, fkUsuario);
+function listar() {
 
     let instrucaoSql = `
-        INSERT INTO post (titulo, conteudo, fk_usuario, imagem) VALUES ('${titulo}', '${conteudo}', ${fkUsuario}, '${imagem}')
+        SELECT
+            post.id,
+            post.titulo,
+            post.conteudo,
+            post.dataPost,
+            post.imagem,
+            post.fk_usuario,
+
+            usuario.nome AS autor,
+
+            COUNT(DISTINCT comentarios.id) AS comentarios,
+            COUNT(DISTINCT curtidas.idCurtida) AS curtidas
+
+        FROM post
+
+        JOIN usuario
+            ON usuario.id = post.fk_usuario
+
+        LEFT JOIN comentarios
+            ON comentarios.fk_post = post.id
+
+        LEFT JOIN curtidas
+            ON curtidas.fk_post = post.id
+
+        GROUP BY
+            post.id,
+            post.titulo,
+            post.conteudo,
+            post.dataPost,
+            post.imagem,
+            post.fk_usuario,
+            usuario.nome
+
+        ORDER BY post.dataPost DESC;
     `;
 
-    console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
 }
 
-function listar() {
-    console.log("ACESSEI O POST MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function listar():");
+function cadastrar(titulo, conteudo, imagem, fk_usuario) {
 
     let instrucaoSql = `
-        SELECT 
-    usuario.nome AS autor,
-    post.titulo,
-    post.conteudo,
-    post.dataPost,
-    post.imagem,
-    COUNT(comentarios.id) AS comentarios
-FROM post
-JOIN usuario
-    ON usuario.id = post.fk_usuario
-LEFT JOIN comentarios
-    ON comentarios.fk_post = post.id
-GROUP BY 
-    post.id,
-    usuario.nome,
-    post.titulo,
-    post.conteudo,
-    post.dataPost,
-    post.imagem
-ORDER BY post.dataPost DESC;
+        INSERT INTO post
+        (titulo, conteudo, imagem, fk_usuario)
+        VALUES
+        ('${titulo}', '${conteudo}', '${imagem}', ${fk_usuario});
     `;
 
-    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
+function deletar(idPost, idUsuario) {
+
+    let instrucaoSql = `
+        DELETE FROM post
+        WHERE id = ${idPost}
+        AND fk_usuario = ${idUsuario};
+    `;
+
     return database.executar(instrucaoSql);
 }
 
 module.exports = {
+    listar,
     cadastrar,
-    listar
+    deletar
 };

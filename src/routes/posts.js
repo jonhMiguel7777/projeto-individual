@@ -9,4 +9,8 @@ router.get("/listar", function (req, res) {
     postController.listar(req, res);
 });
 
+router.delete("/deletar/:idPost", function(req, res) {
+    postController.deletar(req, res);
+});
+    
 module.exports = router;

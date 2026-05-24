@@ -1,55 +1,515 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Posts - Outherside Culture</title>
-    <link rel="stylesheet" href="assets/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Posts - Outherside Culture</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <script src="assets/sessao.js"></script>
 </head>
 <body>
-     <div class="cabecalho">
-      <a class="logo" href="index.html">
-        <img src="assets/images/logo.png" alt="Logo Otherside Culture" />
-      </a>
-      <nav class="cabecalho-nav">
-        <ul>
-          <li><a href="login.html">Métricas</a></li>
-          <li><a href="addPost.html">Adicionar posts</a></li>
-          <li><a href="addEvento.html">Adicionar evento</a></li>
-          <li><a id="nomeUsers"></a></li>
 
-        </ul>
-      </nav>
-    </div>
+  <div class="cabecalho">
 
+    <a class="logo" href="index.html">
+      <img src="assets/images/logo.png" alt="Logo Otherside Culture" />
+    </a>
 
-    <div id="feed-posts">
-      
-    </div>
+    <nav class="cabecalho-nav">
 
-    <script>
-      nomeUsers.innerHTML = sessionStorage.NOME_USUARIO;
+      <ul>
 
-      fetch('/posts/listar')
-  .then(res => res.json())
-  .then(posts => {
-    let feed = document.getElementById('feed-posts');
-    for (let i = 0; i < posts.length; i++) {
-      let post = posts[i];
-      let html = '<div class="post">';
-      html += '<h3>' + post.titulo + '</h3>';
-      html += '<p>' + post.conteudo + '</p>';
-      if (post.imagem) {
-        html += '<img src="/assets/uploads/' + post.imagem + '" style="max-width:100%">';
-      }
-      html += '<small>Por: ' + post.autor + ' - ' + post.dataPost + '</small>';
-      if (post.comentarios) {
-        html += '<div class="comentarios"><strong>Comentários:</strong> ' + post.comentarios + '</div>';
-      }
-      html += '</div>';
-      feed.innerHTML += html;
+        <li>
+          <a href="metricas.html">
+            Métricas
+          </a>
+        </li>
+
+        <li>
+          <a href="addPost.html">
+            Adicionar posts
+          </a>
+        </li>
+
+        <li>
+          <a href="finalizarEvento.html">
+            Finalizar evento
+          </a>
+        </li>
+
+        <li>
+          <a id="nomeUsers"></a>
+        </li>
+
+      </ul>
+
+    </nav>
+
+  </div>
+
+  <div id="feed-posts"></div>
+
+  <script>
+    let sessao = validarSessao();
+
+    nomeUsers.innerHTML =
+      localStorage.NOME_USUARIO;
+
+    let idUsuario =
+      localStorage.ID_USUARIO;
+
+    carregarPosts();
+
+    function carregarPosts() {
+
+      fetch("/posts/listar")
+
+        .then(function (resposta) {
+          return resposta.json();
+        })
+
+        .then(function (posts) {
+
+          let feed =
+            document.getElementById(
+              "feed-posts"
+            );
+
+          feed.innerHTML = "";
+
+          for (let i = 0; i < posts.length; i++) {
+
+            let post = posts[i];
+
+            let html = `
+            
+              <div class="post">
+
+                <h3>
+                  ${post.titulo}
+                </h3>
+
+                <p>
+                  ${post.conteudo}
+                </p>
+            `;
+
+            if (post.imagem) {
+
+              html += `
+              
+                <img
+                  src="/assets/uploads/${post.imagem}"
+                  style="max-width:100%"
+                >
+              `;
+            }
+
+            html += `
+            
+              <small>
+
+                Por:
+                ${post.autor}
+
+                -
+
+                ${new Date(
+                  post.dataPost
+                ).toLocaleString()}
+
+              </small>
+
+              <br><br>
+
+              <p>
+                ${post.curtidas}
+                confirmações
+              </p>
+
+              <p>
+                ${post.comentarios}
+                comentários
+              </p>
+
+              <button onclick="
+                curtirPost(${post.id})
+              ">
+                Confirmar presença
+              </button>
+            `;
+
+            if (
+              Number(post.fk_usuario)
+              ===
+              Number(idUsuario)
+            ) {
+
+              html += `
+              
+                <button onclick="
+                  deletarPost(${post.id})
+                ">
+                  Apagar post
+                </button>
+              `;
+            }
+
+            html += `
+            
+              <div class="area-comentarios">
+
+                <input
+                  type="text"
+
+                  id="inputComentario${post.id}"
+
+                  placeholder="Comente algo"
+                >
+
+                <button onclick="
+                  comentar(${post.id})
+                ">
+                  Comentar
+                </button>
+
+                <div id="listaComentarios${post.id}"></div>
+
+              </div>
+
+            </div>
+            `;
+
+            feed.innerHTML += html;
+          }
+
+          setTimeout(function () {
+
+            for (let i = 0; i < posts.length; i++) {
+
+              listarComentarios(
+                posts[i].id
+              );
+            }
+
+          }, 0);
+        })
+
+        .catch(function (erro) {
+          console.log(erro);
+        });
     }
-  });
-    </script>
+
+    function curtirPost(idPost) {
+
+      fetch("/curtidas/curtir", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+
+          fkUsuario: idUsuario,
+
+          fkPost: idPost,
+        }),
+      })
+
+        .then(function (resposta) {
+
+          if (resposta.ok) {
+
+            alert(
+              "Presença confirmada!"
+            );
+
+            carregarPosts();
+          }
+        })
+
+        .catch(function (erro) {
+          console.log(erro);
+        });
+    }
+
+    function deletarPost(idPost) {    
+      fetch(`/posts/deletar/${idPost}?idUsuario=${idUsuario}`, {
+        method: "DELETE"
+      })
+      .then(function(resposta) {
+        if (resposta.ok) {
+          alert("Post apagado com sucesso!");
+          carregarPosts();
+        } else {
+          resposta.text().then(t => alert("Erro: " + t));
+        }
+      })
+      .catch(function(erro) { console.log(erro); });
+    }
+
+    function comentar(idPost) {
+
+      let texto =
+        document.getElementById(
+          `inputComentario${idPost}`
+        ).value;
+
+      if (texto == "") return;
+
+      fetch("/comentarios/cadastrar", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+
+          textoServer: texto,
+
+          fkUsuarioServer:
+            idUsuario,
+
+          fkPostServer:
+            idPost,
+
+          fkComentarioPaiServer:
+            null
+        }),
+      })
+
+        .then(function (resposta) {
+
+          if (resposta.ok) {
+
+            listarComentarios(idPost);
+
+            document.getElementById(
+              `inputComentario${idPost}`
+            ).value = "";
+          }
+        })
+
+        .catch(function (erro) {
+          console.log(erro);
+        });
+    }
+
+    function renderizarRespostas(comentarios, idPai, idPost) {
+
+      let html = "";
+
+      for (let i = 0; i < comentarios.length; i++) {
+
+        let c = comentarios[i];
+
+        if (Number(c.fkComentarioPai) === Number(idPai)) {
+
+          html += `
+            <div class="comentario resposta">
+
+              <div class="comentario-topo">
+                <strong>${c.nome}</strong>
+              </div>
+
+              <div class="comentario-texto">
+                ${c.texto}
+              </div>
+
+            </div>
+          `;
+        }
+      }
+
+      return html;
+    }
+
+    function listarComentarios(idPost) {
+
+      fetch(`/comentarios/listar/${idPost}`)
+
+        .then(function (resposta) {
+          return resposta.json();
+        })
+
+        .then(function (comentarios) {
+
+          let divComentarios =
+            document.getElementById(
+              `listaComentarios${idPost}`
+            );
+
+          if (!divComentarios) return;
+
+          if (comentarios.length == 0) {
+
+            divComentarios.innerHTML = `
+              <p class="semComentarios">
+                Nenhum comentário ainda.
+              </p>
+            `;
+
+            return;
+          }
+
+          let html = "";
+
+          for (
+            let i = 0;
+            i < comentarios.length;
+            i++
+          ) {
+
+            let comentario =
+              comentarios[i];
+
+            if (
+              comentario.fkComentarioPai == null
+            ) {
+
+              html += `
+
+                <div class="comentario">
+
+                  <div class="comentario-topo">
+
+                    <strong>
+                      ${comentario.nome}
+                    </strong>
+
+                  </div>
+
+                  <div class="comentario-texto">
+
+                    ${comentario.texto}
+
+                  </div>
+
+                  <button
+                    class="btn-responder"
+
+                    onclick="
+                      abrirResposta(
+                        ${comentario.id},
+                        ${idPost}
+                      )
+                    "
+                  >
+                    Responder
+                  </button>
+
+                  <div
+                    id="respostaBox${comentario.id}"
+                  ></div>
+
+                  <div class="respostas">
+
+                    ${renderizarRespostas(
+                      comentarios,
+                      comentario.id,
+                      idPost
+                    )}
+
+                  </div>
+
+                </div>
+              `;
+            }
+          }
+
+          divComentarios.innerHTML = html;
+        })
+
+        .catch(function (erro) {
+          console.log(erro);
+        });
+    }
+
+    function abrirResposta(
+      idComentario,
+      idPost
+    ) {
+
+      let div =
+        document.getElementById(
+          `respostaBox${idComentario}`
+        );
+
+      div.innerHTML = `
+
+        <input
+          type="text"
+
+          id="inputResposta${idComentario}"
+          style="color:black;"
+
+          placeholder="Responder..."
+        >
+
+        <button onclick="
+          responderComentario(
+            ${idComentario},
+            ${idPost}
+          )
+        ">
+          Enviar
+        </button>
+      `;
+    }
+
+    function responderComentario(
+      idComentarioPai,
+      idPost
+    ) {
+
+      let texto =
+        document.getElementById(
+          `inputResposta${idComentarioPai}`
+        ).value;
+
+      if (texto == "") return;
+
+      fetch("/comentarios/cadastrar", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+
+          textoServer: texto,
+
+          fkUsuarioServer:
+            idUsuario,
+
+          fkPostServer:
+            idPost,
+
+          fkComentarioPaiServer:
+            idComentarioPai
+        }),
+      })
+
+        .then(function (resposta) {
+
+          if (resposta.ok) {
+
+            listarComentarios(idPost);
+          }
+        })
+
+        .catch(function (erro) {
+          console.log(erro);
+        });
+    }
+
+  </script>
 </body>
 </html>

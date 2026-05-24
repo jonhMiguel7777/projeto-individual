@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finalizar eventos - OutherSide Culture</title>
+    <link rel="stylesheet" href="assets/style.css" />
+    <script src="assets/sessao.js"></script>
+  </head>
+  <body>
+    <div class="cabecalho">
+      <a class="logo" href="index.html">
+        <img src="assets/images/logo.png" alt="Logo Otherside Culture" />
+      </a>
+      <nav class="cabecalho-nav">
+        <ul>
+          <li><a href="posts.html">Posts</a></li>
+          <li><a href="metricas.html">Métricas</a></li>
+          <li><a href="addPost.html">Adicionar Post</a></li>
+          <li><a id="nomeUsers"></a></li>
+          <li><a href="#" onclick="sair()">Sair</a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="secao-form">
+      <div class="container-form">
+        <h2>Finalizar Evento</h2>
+        <p style="color: #666; margin-bottom: 20px;">
+          Registre os dados do evento realizado para alimentar as suas métricas.
+        </p>
+
+        <form onsubmit="cadastrarEvento(event)">
+          <div class="campo-formulario">
+            <label for="ipt_nomeEvento">Nome do evento</label>
+            <input type="text" id="ipt_nomeEvento" placeholder="Ex: Sarau de Outubro" required />
+          </div>
+          <div class="campo-formulario">
+            <label for="ipt_dataEvento">Data em que o evento ocorreu</label>
+            <input type="date" id="ipt_dataEvento" required />
+          </div>
+          <div class="campo-formulario">
+            <label for="ipt_qtdPessoas">Quantas pessoas compareceram?</label>
+            <input type="number" id="ipt_qtdPessoas" min="0" placeholder="Ex: 150" required />
+          </div>
+          <button type="submit" class="botao-form">Registrar evento</button>
+        </form>
+
+        <div id="msg-sucesso" style="display:none; margin-top:20px; padding:15px; background:#d4edda; color:#155724; border-radius:8px;">
+          Evento registrado! Os dados já aparecem no seu <a href="metricas.html">painel de métricas</a>.
+        </div>
+        <div id="msg-erro" style="display:none; margin-top:20px; padding:15px; background:#f8d7da; color:#721c24; border-radius:8px;">
+           Erro ao registrar o evento. Tente novamente.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let sessao = validarSessao();
+      nomeUsers.innerHTML = sessao.nome;
+
+      let hoje = new Date().toISOString().split('T')[0];
+      document.getElementById("ipt_dataEvento").value = hoje;
+      document.getElementById("ipt_dataEvento").max   = hoje;
+
+      function cadastrarEvento(event) {
+        event.preventDefault();
+
+        document.getElementById("msg-sucesso").style.display = "none";
+        document.getElementById("msg-erro").style.display    = "none";
+
+        fetch("/metricas/cadastrarEvento", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            nomeEventoServer: ipt_nomeEvento.value.trim(),
+            qtdPessoasServer: ipt_qtdPessoas.value,
+            dataEventoServer: ipt_dataEvento.value,
+            fkUsuarioServer:  sessao.id
+          })
+        })
+        .then(function(resposta) {
+  if (resposta.ok) {
+    document.getElementById("msg-sucesso").style.display = "block";
+    ipt_nomeEvento.value = "";
+    ipt_qtdPessoas.value = "";
+    ipt_dataEvento.value = hoje;
+    setTimeout(function() {
+      window.location = "metricas.html";
+    }, 1500);
+  } else {
+    resposta.text().then(t => {
+      document.getElementById("msg-erro").style.display = "block";
+      console.error(t);
+    });
+  }
+}).catch(function(erro) {
+          document.getElementById("msg-erro").style.display = "block";
+          console.log(erro);
+        });
+      }
+    </script>
+  </body>
+</html>

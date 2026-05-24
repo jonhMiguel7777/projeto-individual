@@ -6,4 +6,8 @@ router.get("/buscarMetricas", function (req, res) {
     metricasController.buscarMetricas(req, res);
 });
 
+router.post("/cadastrarEvento", function(req, res) {
+    metricasController.cadastrarEvento(req, res);
+});
+
 module.exports = router;

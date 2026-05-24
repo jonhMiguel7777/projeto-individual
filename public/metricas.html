@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Métricas - Otherside Culture</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/sessao.js"></script>
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -14,9 +15,11 @@
         </a>
         <nav class="cabecalho-nav">
             <ul>
-                <li><a href="index.html">Início</a></li>
                 <li><a href="posts.html">Posts</a></li>
                 <li><a href="addPost.html">Adicionar Post</a></li>
+                <li><a href="finalizarEvento.html">Finalizar Evento</a></li>
+                <li><a id="nomeUsers"></a></li>
+                <li><a href="#" onclick="sair()">Sair</a></li>
             </ul>
         </nav>
     </div>
@@ -26,9 +29,8 @@
             <h1>Métricas dos eventos</h1>
             <p class="descricao-metricas">Acompanhe o desempenho e crescimento da sua Casa de cultura.</p>
 
-            <div class="grafico-container">
-                <h2 id="comparecimentos">Quantas pessoas compareceram aos evento</h2>
-                <canvas id="grafico_linha" width="400" height="200"></canvas>
+            <div id="aviso-sem-eventos" style="display:none; padding:20px; text-align:center;">
+                <p>Você ainda não cadastrou nenhum evento. <a href="finalizarEvento.html">Cadastre seu primeiro evento aqui!</a></p>
             </div>
 
             <div class="metricas-grid">
@@ -44,122 +46,76 @@
                 </div>
                 <div class="metrica-card">
                     <h3>Média de pessoas</h3>
-                    <div class="numero-metrica" id="kpi_média_de_pessoas">0</div>
+                    <div class="numero-metrica" id="kpi_media_de_pessoas">0</div>
                     <p class="tendencia">+15% este mês</p>
                 </div>
+            </div>
+
+            <div class="grafico-container">
+                <h2>Quantas pessoas compareceram aos eventos</h2>
+                <canvas id="grafico_linha" width="400" height="200"></canvas>
             </div>
         </div>
     </div>
 
     <script>
+        let sessao = validarSessao();
+        let idUsuario = sessao.id;
 
-let data = [];
-let labels = [];
+        document.getElementById("nomeUsers").innerHTML = sessao.nome;
 
-fetch("/metricas/buscarMetricas")
-.then(function(res){
-    return res.json();
-})
-.then(function(resultado){
+        fetch("/metricas/buscarMetricas?idUsuario=" + idUsuario)
+        .then(function(res) { return res.json(); })
+        .then(function(resultado) {
 
-    let soma_total_de_pessoas = 0;
-    let total_de_eventos = resultado.length;
-
-    for (let i = 0; i < resultado.length; i++){
-
-        labels.push(resultado[i].nomeEvento);
-
-        data.push(resultado[i].qtdPessoas);
-
-        soma_total_de_pessoas += resultado[i].qtdPessoas;
-    }
-
-    // KPI TOTAL PESSOAS
-
-    document.getElementById("kpi_frequencia").innerHTML =
-    soma_total_de_pessoas;
-
-    // KPI TOTAL EVENTOS
-
-    document.getElementById("kpi_total_eventos").innerHTML =
-    total_de_eventos;
-
-    // MÉDIA
-
-    let media = soma_total_de_pessoas / total_de_eventos;
-
-    document.getElementById("kpi_média_de_pessoas").innerHTML =
-    media.toFixed(0);
-
-    
-    var grafico_linha = document.getElementById('grafico_linha');
-
-    var chart = new Chart(grafico_linha, {
-
-        type: 'line',
-
-        data: {
-            labels: labels,
-
-            datasets: [{
-                label: "Eventos",
-                data: data,
-                borderColor: '#e3242b',
-                backgroundColor: 'rgba(227, 36, 43, 0.1)',
-                borderWidth: 3,
-                fill: true
-            }]
-        },
-
-        options: {
-
-            responsive: true,
-
-            plugins: {
-
-                title: {
-                    display: true,
-                    text: 'Pessoas que frequentaram',
-                    font: {
-                        size: 16,
-                        weight: 'bold'
-                    }
-                },
-
-                legend: {
-                    display: true,
-                    position: 'top'
-                }
-            },
-
-            scales: {
-
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    }
-                },
-
-                x: {
-                    grid: {
-                        color: 'rgba(0, 0, 0, 0.1)'
-                    }
-                }
-            },
-
-            interaction: {
-                intersect: false,
-                mode: 'index'
+            if (resultado.length === 0) {
+                document.getElementById("aviso-sem-eventos").style.display = "block";
+                document.getElementById("grafico_linha").style.display = "none";
+                return;
             }
-        }
-    });
 
-})
-.catch(function(erro) {
-    console.log(erro);
-});
+            let data   = [];
+            let labels = [];
+            let soma   = 0;
 
-</script>
+            for (let i = 0; i < resultado.length; i++) {
+                labels.push(resultado[i].nomeEvento);
+                data.push(resultado[i].qtdPessoas);
+                soma += resultado[i].qtdPessoas;
+            }
+
+            document.getElementById("kpi_frequencia").innerHTML       = soma;
+            document.getElementById("kpi_total_eventos").innerHTML     = resultado.length;
+            document.getElementById("kpi_media_de_pessoas").innerHTML  = (soma / resultado.length).toFixed(0);
+
+            new Chart(document.getElementById('grafico_linha'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Pessoas por evento",
+                        data: data,
+                        borderColor: '#e3242b',
+                        backgroundColor: 'rgba(227, 36, 43, 0.1)',
+                        borderWidth: 3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Pessoas que frequentaram', font: { size: 16, weight: 'bold' } },
+                        legend: { display: true, position: 'top' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true },
+                        x: {}
+                    },
+                    interaction: { intersect: false, mode: 'index' }
+                }
+            });
+        })
+        .catch(function(erro) { console.log(erro); });
+    </script>
 </body>
 </html>
