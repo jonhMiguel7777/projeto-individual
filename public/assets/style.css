@@ -217,6 +217,18 @@
     background-color: #fafafa;
 }
 
+ .msg-erro {
+            display: block;
+            color: #e3242b;
+            font-size: 12px;
+            margin-top: 4px;
+            min-height: 16px;
+        }
+
+        .input-invalido {
+            border-color: #e3242b !important;
+        }
+
 .campo-formulario input::placeholder {
     color: #aaa;
     font-style: italic;

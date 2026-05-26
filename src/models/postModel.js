@@ -56,12 +56,14 @@ function cadastrar(titulo, conteudo, imagem, fk_usuario) {
 
 function deletar(idPost, idUsuario) {
 
-    let instrucaoSql = `
-        DELETE FROM post
-        WHERE id = ${idPost}
-        AND fk_usuario = ${idUsuario};
+    let instrucaoSql = `        
+        DELETE respostas, comentarios, curtidas, post
+        FROM post
+        LEFT JOIN comentarios ON comentarios.fk_post = post.id
+        LEFT JOIN comentarios AS respostas ON respostas.fk_comentarioPai = comentarios.id
+        LEFT JOIN curtidas ON curtidas.fk_post = post.id
+        WHERE post.id = ${idPost};
     `;
-
     return database.executar(instrucaoSql);
 }
 
